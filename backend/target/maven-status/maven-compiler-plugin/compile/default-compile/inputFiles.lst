@@ -1,0 +1,5 @@
+/mnt/k/repositorios github/sentiment-api-hackathon/backend/src/main/java/com/api/sentiment/SentimentApiApplication.java
+/mnt/k/repositorios github/sentiment-api-hackathon/backend/src/main/java/com/api/sentiment/service/SentimentService.java
+/mnt/k/repositorios github/sentiment-api-hackathon/backend/src/main/java/com/api/sentiment/controller/SentimentController.java
+/mnt/k/repositorios github/sentiment-api-hackathon/backend/src/main/java/com/api/sentiment/dto/SentimentResponse.java
+/mnt/k/repositorios github/sentiment-api-hackathon/backend/src/main/java/com/api/sentiment/dto/SentimentRequest.java
