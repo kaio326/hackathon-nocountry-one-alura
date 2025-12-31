@@ -18,4 +18,7 @@ public class SentimentResponse {
     
     @JsonProperty("mensagem")
     private String mensagem;
+    
+    @JsonProperty("modelo_usado")
+    private String modeloUsado;
 }

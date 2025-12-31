@@ -24,13 +24,13 @@ app = FastAPI(
 # Carregar modelos e configurações
 print("📁 Carregando modelos...")
 
-tfidf_vectorizer = joblib.load('models/tfidf_vectorizer.joblib')
-model = joblib.load('models/logistic_regression_model.joblib')
+tfidf_vectorizer = joblib.load('data_science/models/tfidf_vectorizer.joblib')
+model = joblib.load('data_science/models/logistic_regression_model.joblib')
 
-with open('models/sentiment_mapping.json', 'r') as f:
+with open('data_science/models/sentiment_mapping.json', 'r') as f:
     sentiment_mapping = json.load(f)
 
-with open('models/model_metadata.json', 'r') as f:
+with open('data_science/models/model_metadata.json', 'r') as f:
     metadata = json.load(f)
 
 # Criar mapeamento reverso
@@ -139,15 +139,24 @@ async def predict_sentiment(request: SentimentRequest):
     - probabilidades_detalhadas: Probabilidades para cada sentimento
     """
     try:
-        # Validação
+        # Validação robusta
         if not request.text or len(request.text.strip()) < 3:
             raise HTTPException(
                 status_code=400,
                 detail="Texto deve ter no mínimo 3 caracteres"
             )
         
+        if len(request.text) > 10000:
+            raise HTTPException(
+                status_code=400,
+                detail="Texto deve ter no máximo 10.000 caracteres"
+            )
+        
+        # Sanitização básica
+        text = request.text.strip()
+        
         # Vetorizar
-        text_tfidf = tfidf_vectorizer.transform([request.text])
+        text_tfidf = tfidf_vectorizer.transform([text])
         
         # Predizer
         pred_label = model.predict(text_tfidf)[0]
@@ -196,10 +205,10 @@ async def predict_sentiment_bulk(request: BulkSentimentRequest):
                 detail="Lista de textos não pode estar vazia"
             )
         
-        if len(request.texts) > 1000:
+        if len(request.texts) > 100:
             raise HTTPException(
                 status_code=400,
-                detail="Máximo de 1000 textos por requisição"
+                detail="Máximo de 100 textos por requisição"
             )
         
         resultados = []
@@ -208,6 +217,14 @@ async def predict_sentiment_bulk(request: BulkSentimentRequest):
             if not text or len(text.strip()) < 3:
                 resultados.append({
                     "previsao": "Erro",
+                    "probabilidade": 0.0,
+                    "probabilidades_detalhadas": {}
+                })
+                continue
+            
+            if len(text) > 10000:
+                resultados.append({
+                    "previsao": "Erro - Texto muito longo",
                     "probabilidade": 0.0,
                     "probabilidades_detalhadas": {}
                 })

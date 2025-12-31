@@ -13,7 +13,7 @@ import jakarta.validation.Valid;
 @Slf4j
 @RestController
 @RequestMapping("/api/sentiment")
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = {"http://localhost:8080", "http://localhost:3000"})
 public class SentimentController {
 
     @Autowired
@@ -30,24 +30,24 @@ public class SentimentController {
             @Valid @RequestBody SentimentRequest request) {
         
         log.info("Requisição recebida para análise de sentimento");
-        log.debug("Texto: {}", request.getText().substring(0, Math.min(50, request.getText().length())));
+        log.debug("Texto de {} caracteres recebido", request.getText().length());
         
         try {
             // Validação
             if (request.getText() == null || request.getText().trim().isEmpty()) {
                 log.warn("Texto vazio recebido");
                 return ResponseEntity.badRequest()
-                    .body(new SentimentResponse("Erro", 0.0, "Texto não pode estar vazio"));
+                    .body(new SentimentResponse("Erro", 0.0, "Texto não pode estar vazio", null));
             }
 
             if (request.getText().length() < 3) {
                 log.warn("Texto muito curto: {} caracteres", request.getText().length());
                 return ResponseEntity.badRequest()
-                    .body(new SentimentResponse("Erro", 0.0, "Texto deve ter no mínimo 3 caracteres"));
+                    .body(new SentimentResponse("Erro", 0.0, "Texto deve ter no mínimo 3 caracteres", null));
             }
 
             // Chamar serviço
-            SentimentResponse response = sentimentService.predictSentiment(request.getText());
+            SentimentResponse response = sentimentService.predictSentiment(request);
             
             log.info("Sentimento predito: {} (probabilidade: {})", 
                 response.getPrevisao(), response.getProbabilidade());
@@ -55,9 +55,9 @@ public class SentimentController {
             return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            log.error("Erro ao processar requisição: {}", e.getMessage(), e);
+            log.error("Erro interno ao processar requisição: {}", e.getMessage(), e);
             return ResponseEntity.internalServerError()
-                .body(new SentimentResponse("Erro", 0.0, "Erro ao processar: " + e.getMessage()));
+                .body(new SentimentResponse("Erro", 0.0, "Erro interno do servidor. Tente novamente mais tarde.", null));
         }
     }
 
