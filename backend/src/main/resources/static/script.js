@@ -2,8 +2,28 @@ let selectedRating = 0;
 let selectedRecommendation = null;
 let selectedModel = 'auto';
 
+// Wake up services on page load (Render free tier spin-down)
+async function wakeUpServices() {
+    try {
+        // Visit Python API root to wake it up
+        await fetch('https://sentiment-api-t3ng.onrender.com/', { 
+            method: 'GET'
+        }).catch(() => {});
+        
+        // Visit backend root to wake it up
+        await fetch(window.location.origin + '/', { 
+            method: 'GET'
+        }).catch(() => {});
+        
+        console.log('Services wake-up initiated');
+    } catch (error) {
+        console.log('Wake-up completed');
+    }
+}
+
 // Inicializar UI
 document.addEventListener('DOMContentLoaded', function() {
+    wakeUpServices();
     initializeStars();
     initializeTabs();
     updateSections();
