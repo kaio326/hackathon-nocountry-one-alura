@@ -1,4 +1,7 @@
 timeline.md
 *.log
 .venv/
+*env/
 .env
+.env.local
+.env.*.local

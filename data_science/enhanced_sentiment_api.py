@@ -11,10 +11,17 @@ import numpy as np
 from typing import Dict, List, Optional
 import uvicorn
 from scipy.sparse import hstack
+import os
+import sys
 
 # ============================================================================
 # INICIALIZAÇÃO
 # ============================================================================
+
+# Definir caminho base (diretório do script)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, 'models')
+MODELS_ENHANCED_DIR = os.path.join(MODELS_DIR, 'enhanced')
 
 app = FastAPI(
     title="Enhanced Sentiment Analysis API",
@@ -24,21 +31,21 @@ app = FastAPI(
 
 # Carregar modelo original
 print("📁 Carregando modelo original...")
-tfidf_original = joblib.load('data_science/models/tfidf_vectorizer.joblib')
-model_original = joblib.load('data_science/models/logistic_regression_model.joblib')
+tfidf_original = joblib.load(os.path.join(MODELS_DIR, 'tfidf_vectorizer.joblib'))
+model_original = joblib.load(os.path.join(MODELS_DIR, 'logistic_regression_model.joblib'))
 
-with open('data_science/models/sentiment_mapping.json', 'r') as f:
+with open(os.path.join(MODELS_DIR, 'sentiment_mapping.json'), 'r') as f:
     sentiment_mapping = json.load(f)
 
 # Tentar carregar modelo enhanced (se existir)
 try:
     print("📁 Carregando modelo enhanced...")
-    tfidf_enhanced = joblib.load('data_science/models/enhanced/tfidf_vectorizer.joblib')
-    rating_scaler = joblib.load('data_science/models/enhanced/rating_scaler.joblib')
-    text_length_scaler = joblib.load('data_science/models/enhanced/text_length_scaler.joblib')
-    model_enhanced = joblib.load('data_science/models/enhanced/random_forest_model.joblib')
+    tfidf_enhanced = joblib.load(os.path.join(MODELS_ENHANCED_DIR, 'tfidf_vectorizer.joblib'))
+    rating_scaler = joblib.load(os.path.join(MODELS_ENHANCED_DIR, 'rating_scaler.joblib'))
+    text_length_scaler = joblib.load(os.path.join(MODELS_ENHANCED_DIR, 'text_length_scaler.joblib'))
+    model_enhanced = joblib.load(os.path.join(MODELS_ENHANCED_DIR, 'random_forest_model.joblib'))
 
-    with open('data_science/models/enhanced/model_metadata.json', 'r') as f:
+    with open(os.path.join(MODELS_ENHANCED_DIR, 'model_metadata.json'), 'r') as f:
         enhanced_metadata = json.load(f)
 
     ENHANCED_AVAILABLE = True
@@ -51,6 +58,48 @@ except FileNotFoundError:
 reverse_mapping = {v: k for k, v in sentiment_mapping.items()}
 
 print("✅ Modelos carregados com sucesso!")
+
+# ============================================================================
+# STARTUP EVENT - MOSTRAR ENDPOINTS
+# ============================================================================
+
+@app.on_event("startup")
+async def startup_event():
+    """Mostrar endpoints ativos ao iniciar"""
+    print("\n" + "="*70)
+    print("🚀 SENTIMENT ANALYSIS API - ENDPOINTS ATIVOS")
+    print("="*70)
+    print("\n📊 MODELOS DISPONÍVEIS:")
+    print("   ✅ Original Model (TF-IDF + Logistic Regression)")
+    if ENHANCED_AVAILABLE:
+        print("   ✅ Enhanced Model (TF-IDF + Random Forest)")
+    else:
+        print("   ⚠️  Enhanced Model (não encontrado)")
+    
+    print("\n🔌 ENDPOINTS:")
+    print("   POST /predict")
+    print("        → Predição usando modelo original (texto apenas)")
+    print("        → Request: {\"text\": \"seu texto aqui\"}")
+    print("")
+    print("   POST /predict/enhanced")
+    print("        → Predição usando modelo enhanced")
+    print("        → Request: {\"text\": \"...\", \"rating\": 1-5, \"recommend_to_friend\": true/false}")
+    print("")
+    print("   POST /predict/auto")
+    print("        → Escolhe modelo automaticamente")
+    print("        → Request: {\"text\": \"...\", \"rating\": 1-5 (opcional), \"recommend_to_friend\": true/false (opcional)}")
+    print("")
+    print("   GET /docs")
+    print("        → Documentação interativa (Swagger UI)")
+    print("        → Teste endpoints diretamente")
+    print("")
+    print("   GET /redoc")
+    print("        → Documentação alternativa (ReDoc)")
+    print("")
+    print("   GET /health")
+    print("        → Status da API")
+    print("\n" + "="*70)
+    print("API pronta! 🎯\n")
 
 # ============================================================================
 # MODELOS PYDANTIC
@@ -399,6 +448,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=5000,
+        port=int(sys.argv[1]) if len(sys.argv) > 1 else 8000,
         log_level="info"
     )

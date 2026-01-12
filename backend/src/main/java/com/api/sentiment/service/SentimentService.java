@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 public class SentimentService {
 
-    @Value("${sentiment.api.url:http://localhost:5000}")
+    @Value("${sentiment.api.url:http://localhost:8000}")
     private String sentimentApiUrl;
 
     private final RestTemplate restTemplate;

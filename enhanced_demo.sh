@@ -23,7 +23,7 @@ for i in "${!TEST_CASES[@]}"; do
     echo "📝 Test Case $((i+1)):"
     echo "Request: ${TEST_CASES[$i]}"
 
-    response=$(curl -s -X POST "http://localhost:5000/predict/enhanced" \
+    response=$(curl -s -X POST "http://localhost:8000/predict/enhanced" \
          -H "Content-Type: application/json" \
          -d "${TEST_CASES[$i]}")
 
@@ -55,7 +55,7 @@ for i in "${!TEXTS[@]}"; do
     echo "📝 Test Case $((i+1)) - Original Model:"
     echo "Text: ${TEXTS[$i]}"
 
-    response=$(curl -s -X POST "http://localhost:5000/predict" \
+    response=$(curl -s -X POST "http://localhost:8000/predict" \
          -H "Content-Type: application/json" \
          -d "{\"text\": \"${TEXTS[$i]}\"}")
 
@@ -75,11 +75,11 @@ echo "🎯 Auto API Demo (chooses best model automatically):"
 echo "==================================================="
 
 echo "With all parameters (uses enhanced):"
-curl -s -X POST "http://localhost:5000/predict/auto?text=Amazing product!&rating=5&recommend_to_friend=true" | jq . 2>/dev/null || echo "Response received"
+curl -s -X POST "http://localhost:8000/predict/auto?text=Otimo produto!&rating=5&recommend_to_friend=true" | jq . 2>/dev/null || echo "Response received"
 
 echo ""
 echo "With only text (uses original):"
-curl -s -X POST "http://localhost:5000/predict/auto?text=Amazing product!" | jq . 2>/dev/null || echo "Response received"
+curl -s -X POST "http://localhost:8000/predict/auto?text=Otimo produto!" | jq . 2>/dev/null || echo "Response received"
 
 echo ""
 echo "📊 Summary:"

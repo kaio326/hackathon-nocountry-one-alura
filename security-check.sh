@@ -55,7 +55,7 @@ else
 fi
 
 # Check input validation
-if grep -q "10000" data_science/sentiment_api.py; then
+if grep -q "10000" data_science/enhanced_sentiment_api.py; then
     echo "✅ Input length validation implemented"
 else
     echo "❌ Input length validation missing"

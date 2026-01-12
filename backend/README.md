@@ -1,159 +1,131 @@
 # Backend - Java Spring Boot
 
-## 🚀 Como rodar o servidor
+**Para setup completo com Docker**, veja [README raiz](../README.md).
 
-### Via Docker Compose (recomendado)
-Ver [README raiz](../README.md) para passo a passo completo do Docker.
+## 🚀 Como rodar
+
+### Via Docker (Recomendado)
 ```bash
-# a partir da raiz do projeto
 sudo docker-compose up -d
 ```
-- Backend: http://localhost:8080
+Backend em: http://localhost:8080
 
 ### Local (fora do Docker)
-Pré-requisitos: Java 17+, Maven 3.6+
-```bash
-# terminal 1: subir Python API
-cd data_science
-python sentiment_api.py
+Pré-requisitos: Java 17+, Maven 3.6+, Python 3.11+
 
-# terminal 2: subir backend
+**Passo 1: Preparar o ambiente Python**
+```bash
+# Terminal 1: subir Python API (Enhanced)
+cd data_science
+
+# Criar/ativar ambiente virtual (se não existir)
+python3 -m venv sentiment-env
+source sentiment-env/bin/activate
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Iniciar API na porta 8000
+python enhanced_sentiment_api.py 8000
+```
+
+Você deve ver:
+```
+======================================================================
+🚀 SENTIMENT ANALYSIS API - ENDPOINTS ATIVOS
+======================================================================
+...
+Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+**Passo 2: Rodar o Backend Java**
+```bash
+# Terminal 2: voltar para backend e rodar
 cd backend
 mvn spring-boot:run
 ```
 
-Teste rápido:
+Backend iniciará em: **http://localhost:8080**
+
+**Passo 3: Testar**
 ```bash
 curl -X POST "http://localhost:8080/api/sentiment/predict" \
    -H "Content-Type: application/json" \
    -d '{"text": "Este produto é excelente!"}'
 ```
 
-## 📋 API Endpoints
+**⚠️ Observações:**
+- A Python API deve estar rodando ANTES de iniciar o Backend
+- O Backend procura a API em `http://localhost:8000`
+- Dados não serão persistidos (sem PostgreSQL local)
+- Cache Redis não funcionará (sem Redis local)
 
-### Information Endpoints
+## 📋 Endpoints
+
+### Informação
 ```bash
-# API overview and status
 curl http://localhost:8080/
-
-# Detailed API information
 curl http://localhost:8080/api
 ```
 
-### Sentiment Analysis
+### Análise simples
 ```bash
 curl -X POST "http://localhost:8080/api/sentiment/predict" \
      -H "Content-Type: application/json" \
-     -d '{"text": "This product is amazing!"}'
+     -d '{"text": "Produto incrível!"}'
 ```
 
-**Response:**
-```json
-{
-  "previsao": "Positivo",
-  "probabilidade": 0.85,
-  "mensagem": "Análise concluída com sucesso"
-}
-```
-
-### Enhanced Sentiment Analysis (Recommended)
-
-The Java backend now supports the Enhanced Model with multiple features for higher accuracy:
-
+### Análise enhanced
 ```bash
-# Enhanced prediction with rating and recommendation
 curl -X POST "http://localhost:8080/api/sentiment/predict/enhanced" \
      -H "Content-Type: application/json" \
      -d '{
-       "text": "Este produto é excelente!",
+       "text": "Produto excelente!",
        "rating": 5,
        "recommend_to_friend": true
      }'
 ```
 
-**Enhanced Response:**
-```json
-{
-  "previsao": "Positivo",
-  "probabilidade": 0.92,
-  "probabilidades_detalhadas": {
-    "Negativo": 0.02,
-    "Neutro": 0.06,
-    "Positivo": 0.92
-  },
-  "modelo_usado": "enhanced"
-}
-```
+### Seleção automática de modelo
 
-### Auto Prediction (Smart Selection)
-
-Automatically chooses the best available model:
+Escolhe o melhor modelo disponível:
 
 ```bash
-# Uses Enhanced Model (all parameters provided)
-curl -X POST "http://localhost:8080/api/sentiment/predict/auto?text=Amazing product!&rating=5&recommend_to_friend=true"
+# Com todos os parâmetros → Modelo enhanced
+curl -X POST "http://localhost:8080/api/sentiment/predict/auto?text=Produto incrível&rating=5&recommend_to_friend=true"
 
-# Uses Original Model (only text provided)
-curl -X POST "http://localhost:8080/api/sentiment/predict/auto?text=Amazing product!"
+# Apenas texto → Modelo original
+curl -X POST "http://localhost:8080/api/sentiment/predict/auto?text=Produto incrível"
 ```
 
-## 🏗️ Architecture
+## 🏗️ Arquitetura
 
-The Java backend acts as an API gateway that:
-- Receives HTTP requests from clients
-- Validates input data
-- Calls the Python ML service internally
-- Returns formatted responses
-- Provides additional business logic layer
+O backend Java funciona como um gateway API que:
+- Recebe requisições HTTP
+- Valida dados de entrada
+- Chama o serviço Python internamente
+- Retorna respostas formatadas
 
-### Service Communication
-- Java Backend (port 8080) → Python API (container: api, port 5000)
-- Uses RestTemplate for HTTP communication
-- Container networking via Docker Compose
-- Supports both Original and Enhanced ML models
+**Comunicação:**
+- Backend Java (8080) → API Python (8000)
+- Usa RestTemplate para chamadas HTTP
+- Suporta modelos Original e Enhanced
 
-### Model Selection Logic
-The backend intelligently routes requests to the appropriate model:
+**Roteamento inteligente:**
+- `/predict` → Modelo original (texto)
+- `/predict/enhanced` → Modelo enhanced (texto + rating + recomendação)
+- `/predict/auto` → Escolhe automaticamente baseado nos parâmetros
 
-- **`/api/sentiment/predict`** → Always uses Original Model (text-only)
-- **`/api/sentiment/predict/enhanced`** → Uses Enhanced Model (multi-feature)
-- **`/api/sentiment/predict/auto`** → Auto-selects based on provided parameters:
-  - All parameters (text + rating + recommendation) → Enhanced Model
-  - Only text → Original Model
-  - Enhanced model unavailable → Falls back to Original Model
+## 📝 Componentes principais
 
-### Available Models
-- **Original Model**: TF-IDF + Logistic Regression (~88% accuracy)
-- **Enhanced Model**: TF-IDF + Rating + Recommendation + Random Forest (~92% accuracy)
+- `SentimentController.java` - Endpoints REST
+- `SentimentService.java` - Lógica de negócio
+- `SentimentRequest.java` - DTO de entrada
+- `SentimentResponse.java` - DTO de saída
+- `SentimentApiApplication.java` - Classe principal
 
-##  Key Components
+## � Build
 
-- `SentimentController.java` - REST API endpoints
-- `SentimentService.java` - Business logic and Python API communication
-- `SentimentRequest.java` - Input validation DTO
-- `SentimentResponse.java` - Response DTO
-- `SentimentApiApplication.java` - Spring Boot main class
-
-## ⚙️ Configuration
-
-### Docker Environment
-- Uses `http://api:5000` to communicate with Python service
-- Runs on port 8080
-- Profile: `docker`
-
-### Local Environment
-- Uses `http://localhost:5000` for Python service
-- Runs on port 8080
-- Default profile
-
-## 🔧 Building
-
-### Docker Build
-```bash
-sudo docker-compose build backend
-```
-
-### Maven Build
 ```bash
 cd backend
 mvn clean package
@@ -161,20 +133,26 @@ mvn clean package
 
 ## 🐛 Troubleshooting
 
-### Common Issues
+### Problemas comuns
 
-1. **Connection refused to Python API**
-   - Ensure Python service is running
-   - Check container networking: `sudo docker-compose ps`
+1. **API Python não responde**
+   ```bash
+   curl http://localhost:8000/health
+   ```
+   Verifique se a API está rodando ANTES do Backend.
 
-2. **Port conflicts**
-   - Port 8080 might be in use by another service
+2. **Porta 8080 já está em uso**
+   ```bash
+   lsof -i :8080
+   ```
 
-3. **Build failures**
-   - Ensure Java 17+ and Maven are installed
-   - Check for compilation errors: `mvn compile`
+3. **Erro no build Maven**
+   ```bash
+   mvn clean compile
+   mvn dependency:resolve
+   ```
 
-### Logs
-```bash
-sudo docker-compose logs backend
-```
+4. **Ver logs**
+   ```bash
+   sudo docker-compose logs backend
+   ```

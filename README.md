@@ -1,5 +1,24 @@
 # Sentiment Analysis Hackathon Project
 
+## 🚀 Quick Start (Recomendado)
+
+O jeito mais rápido de rodar tudo é usar o script:
+
+```bash
+chmod +x start_server.sh
+./start_server.sh
+```
+
+Este script:
+- ✅ Verifica se você está no diretório correto
+- ✅ Inicia todos os containers Docker
+- ✅ Mostra URLs de acesso
+- ✅ Indica como parar os serviços
+
+Depois acesse: **http://localhost:8080**
+
+---
+
 ## 🏁 Como rodar tudo com Docker (passo a passo)
 
 1) **Pré-requisitos**
@@ -35,9 +54,9 @@
       -H "Content-Type: application/json" \
       -d '{"text": "Ótimo produto!"}'
   ```
-  - Enhanced (texto+rating+recomendação):
+  - Enhanced (texto+rating+recomendação) - via Python API:
   ```bash
-  curl -X POST http://localhost:8000/api/v1/sentiment/predict/enhanced \
+  curl -X POST http://localhost:8000/predict/enhanced \
       -H "Content-Type: application/json" \
       -d '{"text":"Este produto é excelente!","rating":5,"recommend_to_friend":true}'
   ```
@@ -52,32 +71,28 @@
   sudo docker-compose up --build -d
   ```
 
-## 🎯 Project Overview
+## 🎯 O que é este projeto
 
-A complete sentiment analysis system with:
-- **Machine Learning Model**: TF-IDF + Logistic Regression for sentiment classification
-- **Java API Gateway**: Spring Boot backend providing REST endpoints and validation
-- **Python ML Service**: FastAPI microservice handling AI predictions
-- **Database**: PostgreSQL for data storage
-- **Cache**: Redis for performance optimization
-- **Containerization**: Docker Compose for easy deployment
+Sistema completo de análise de sentimentos com:
+- **Modelos de IA**: TF-IDF + Regressão Logística e Random Forest para classificação
+- **Backend Java**: Spring Boot fornecendo endpoints REST com validação
+- **Serviço Python**: FastAPI microserviço fazendo as previsões
+- **Banco de Dados**: PostgreSQL para armazenamento
+- **Cache**: Redis para otimização de performance
+- **Containers**: Docker Compose para fácil deploy
 
-## 🤖 AI Models
+## 🤖 Modelos de IA
 
-### Available Models
+| Modelo | Características | Algoritmo | Acurácia | Quando usar |
+|--------|-----------------|-----------|----------|-------------|
+| **Original** | Texto | TF-IDF + Regressão Logística | ~88% | Análise básica |
+| **Enhanced** | Texto + Rating + Recomendação | TF-IDF + Random Forest | ~92% | Análise avançada com mais dados |
 
-| Model | Features | Algorithm | Accuracy | Use Case |
-|-------|----------|-----------|----------|----------|
-| **Original** | Text only | TF-IDF + Logistic Regression | ~78% | Basic sentiment analysis |
-| **Enhanced** | Text + Rating + Recommendation | TF-IDF + Random Forest | ~99% | Advanced analysis with metadata |
-
-### Model Comparison
-
-The **Enhanced Model** provides significantly better accuracy by incorporating:
-- **Text Analysis**: TF-IDF vectorization of review content
-- **Rating Score**: 1-5 star rating as numerical feature (26% importance)
-- **Recommendation**: Binary feature (would recommend to friend) (30% importance)
-- **Text Length**: Additional contextual information
+O **Modelo Enhanced** tem melhor acurácia porque usa:
+- **Análise de Texto**: TF-IDF (1000 features)
+- **Nota (Rating)**: 1-5 estrelas (26% de importância)
+- **Recomendação**: Sim/Não (30% de importância)
+- **Comprimento do Texto**: Informação contextual
 
 **Expected Improvement**: 26% accuracy gain, especially for edge cases.
 
@@ -95,69 +110,67 @@ This will create improved models in `data_science/models/enhanced/`
 
 ## � Security Configuration
 
-### Environment Variables
+### Variáveis de Ambiente
 
-**NEVER commit the `.env` file to version control!** It contains sensitive credentials.
+**NUNCA faça commit do arquivo `.env`**. Ele contém credenciais sensíveis.
 
-1. **Copy the example file:**
+1. **Copie o arquivo de exemplo:**
    ```bash
    cp .env.example .env
    ```
 
-2. **Edit `.env` with your secure credentials:**
+2. **Edite `.env` com suas credenciais seguras:**
    ```bash
-   nano .env  # or your preferred editor
+   nano .env  # ou seu editor favorito
    ```
 
-### Production Deployment
+### Deployment em Produção
 
-For production, use the secure configuration:
+Para produção, use o arquivo de configuração seguro:
 
 ```bash
-# Copy production environment file
+# Copie arquivo de produção
 cp .env.example .env.prod
-# Edit with production credentials
+# Edite com credenciais de produção
 
-# Deploy with production compose file
+# Deploy com arquivo de composição de produção
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
-### Security Features Implemented
+### Recursos de Segurança
 
-- ✅ **No hardcoded credentials** - All sensitive data uses environment variables
-- ✅ **Redis authentication** - Redis requires password authentication
-- ✅ **Restricted CORS** - Only allows specific origins
-- ✅ **Input validation** - Text length limits and sanitization
-- ✅ **Error handling** - Generic error messages in production
-- ✅ **Resource limits** - Memory and CPU limits on containers
-- ✅ **No privileged containers** - Security hardening applied
-- ✅ **Secure headers** - HTTP security headers configured
+- ✅ **Sem credenciais no código** - Todos os dados sensíveis usam variáveis de ambiente
+- ✅ **Autenticação Redis** - Redis exige senha
+- ✅ **CORS restrito** - Permite apenas origens específicas
+- ✅ **Validação de entrada** - Limites de tamanho e sanitização
+- ✅ **Tratamento de erros** - Mensagens genéricas em produção
+- ✅ **Limites de recursos** - CPU e memória limitados
+- ✅ **Sem containers privilegiados** - Hardening aplicado
+- ✅ **Headers de segurança** - HTTP security headers configurados
 
-### Security Best Practices
+### Boas práticas de segurança
 
-- 🔐 **Change default passwords** before deployment
-- 🚫 **Never expose database ports** in production
-- 🔒 **Use HTTPS** in production environments
-- 📊 **Monitor logs** for suspicious activity
-- 🔄 **Regular updates** of Docker images and dependencies
+- 🔐 **Mude senhas padrão** antes de fazer deploy
+- 🚫 **Nunca exponha portas do banco** em produção
+- 🔒 **Use HTTPS** em ambientes de produção
+- 📊 **Monitore logs** para atividades suspeitas
+- 🔄 **Atualizações regulares** de imagens Docker e dependências
 
 ## 📋 Serviços e Portas
 
-| Service | URL | Description |
-|---------|-----|-------------|
-| **🎨 Web Interface** | http://localhost:8080 | **Interactive sentiment analysis** (recommended) |
-| **Java API** | http://localhost:8080 | **Main API endpoint** (Spring Boot) |
-| **API Info** | http://localhost:8080/ | API overview and endpoints |
-| **API Details** | http://localhost:8080/api | Detailed API information |
-| **🚀 Enhanced API** | http://localhost:8000 | **Advanced sentiment analysis** (FastAPI) |
-| **Enhanced API Docs** | http://localhost:8000/docs | Enhanced API documentation |
-| Python API | http://localhost:5000 | Internal ML service (FastAPI) |
-| API Documentation | http://localhost:5000/docs | Python API docs |
-| pgAdmin | http://localhost:5050 | Database administration |
-| PostgreSQL | localhost:5432 | Database server |
-| Redis | localhost:6379 | Cache server |
+**RESUMO DE PORTAS - TODAS AS ARQUITETURAS:**
 
-## 🎨 Como usar o frontend (mais fácil)
+| Serviço | Porta | URL | Notas |
+|---------|-------|-----|-------|
+| **Web Frontend** | 8080 | http://localhost:8080 | Interface interativa |
+| **Java Backend** | 8080 | http://localhost:8080/api | API principal |
+| **Python ML API** | 8000 | http://localhost:8000 | Análise de sentimentos |
+| **Python ML Docs** | 8000 | http://localhost:8000/docs | Swagger interativo |
+| **pgAdmin** | 5050 | http://localhost:5050 | Gerenciamento DB |
+| **PostgreSQL** | 5432 | localhost:5432 | Banco de dados |
+| **Redis** | 6379 | localhost:6379 | Cache em memória |
+
+## 🎨 Como usar
 
 Após rodar `sudo docker-compose up -d`:
 1. Abra http://localhost:8080
@@ -169,12 +182,12 @@ Detalhes de endpoints e APIs: veja [backend/README.md](backend/README.md) e [dat
 
 **Ver logs:**
 ```bash
-sudo docker-compose logs -f [service-name]
+sudo docker-compose logs -f [serviço]
 ```
 
-**Restart:**
+**Reiniciar:**
 ```bash
-sudo docker-compose restart [service-name]
+sudo docker-compose restart [serviço]
 ```
 
 **Rebuild após mudanças:**
@@ -182,61 +195,27 @@ sudo docker-compose restart [service-name]
 sudo docker-compose up --build -d
 ```
 
-**Limpar:**
+**Parar tudo e limpar:**
 ```bash
 sudo docker-compose down -v
 ```
 
-## 🔧 Troubleshooting
-
-### Common Docker Issues
-
-**Permission denied:**
-```bash
-# Use sudo for Docker commands
-sudo docker-compose up -d
-```
-
-**Port already in use:**
-```bash
-sudo lsof -i :8080
-# Stop conflicting services or change ports in docker-compose.yml
-```
-
-**Build fails:**
-```bash
-sudo docker system prune -a
-sudo docker-compose build --no-cache
-```
-
-**Services not starting:**
-```bash
-sudo docker-compose ps
-sudo docker-compose logs [service-name]
-```
-
-**Out of disk space:**
-```bash
-df -h
-sudo docker system prune -a --volumes
-```
-
-## 📁 Project Structure
+## 📁 Estrutura do projeto
 
 ```
-├── data_science/          # ML models and training code
-│   ├── models/           # Trained models and vectorizers
-│   ├── datasets/         # Training data
-│   ├── notebooks/        # Jupyter notebooks for training
-│   └── sentiment_api.py  # FastAPI microservice
-├── backend/              # Java Spring Boot API gateway
-│   ├── src/              # Java source code
-│   ├── resources/        # Application properties
-│   ├── Dockerfile        # Java container configuration
-│   └── pom.xml           # Maven dependencies
-├── docker-compose.yml    # Container orchestration
-├── Dockerfile           # Python API container configuration
-└── requirements.txt     # Python dependencies
+├── data_science/          # Modelos e código de treinamento
+│   ├── models/           # Modelos treinados
+│   ├── datasets/         # Dados de treinamento
+│   ├── notebooks/        # Jupyter notebooks
+│   └── enhanced_sentiment_api.py  # API FastAPI
+├── backend/              # Backend Java Spring Boot
+│   ├── src/              # Código Java
+│   ├── resources/        # Configurações
+│   ├── Dockerfile
+│   └── pom.xml           # Dependências Maven
+├── docker-compose.yml    # Orquestração de containers
+├── Dockerfile           # Container Python
+└── requirements.txt     # Dependências Python
 ```
 
 ## � Documentação dos módulos
@@ -250,21 +229,20 @@ Para rodar componentes individualmente fora do Docker:
 - Python: veja [data_science/README.md](data_science/README.md)
 - Java: veja [backend/README.md](backend/README.md)
 
-## 📊 Model Performance
+## 📊 Performance
 
-- **Accuracy**: ~88%
-- **Negative Recall**: 96% (optimized for negative comment detection)
-- **Classes**: Positive, Neutral, Negative
-- **Features**: TF-IDF with 1000 features, bigrams included
+- **Acurácia**: ~88-92% (depende do modelo)
+- **Recall (Negativos)**: 96% (otimizado para detectar críticas)
+- **Classes**: Positivo, Neutro, Negativo
+- **Features**: TF-IDF com 1000 features
 
-## 🤝 Contributing
+## 🤝 Como contribuir
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test with Docker
-5. Submit a pull request
+1. Faça um fork do repositório
+2. Crie uma branch para sua feature
+3. Faça as mudanças e teste com Docker
+4. Envie um pull request
 
-## 📄 License
+## 📄 Licença
 
-This project is part of the 2025 Oracle/Alura/NoCountry Hackathon.
+Este projeto faz parte do Hackathon 2025 Oracle/Alura/NoCountry.

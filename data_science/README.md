@@ -1,236 +1,175 @@
-# Sentiment Analysis API - Data Science Module
+# Data Science - Módulo de Análise de Sentimentos
 
-## 🚀 Instalar dependências e rodar notebooks/APIs
+**Para setup completo com Docker**, veja [README raiz](../README.md).
 
-### Ambiente Python
-- Requer Python 3.11+
-- Ambiente virtual recomendado (há um pronto em `tools/sentiment-env`)
+## 🚀 Instalar e rodar
 
+### Requisitos
+- Python 3.11+
+- pip (gerenciador de pacotes)
+
+### Instalação
 ```bash
-# ativar ambiente existente
-cd tools/sentiment-env
-source bin/activate
+# Criar ambiente virtual
+python3 -m venv sentiment-env
+source sentiment-env/bin/activate
 
-# ou criar outro e instalar deps
-pip install -r ../requirements.txt
+# Instalar dependências
+pip install -r requirements.txt
 ```
 
-### Rodar a API localmente
+### Rodar a API
 ```bash
-cd data_science
-python sentiment_api.py   # API original
-# ou
-python enhanced_sentiment_api.py   # API enhanced
+python enhanced_sentiment_api.py 8000
 ```
-API: http://localhost:5000
+API disponível em: http://localhost:8000
 
-### Treinar e executar notebooks
-```bash
-cd data_science/notebooks
-jupyter notebook enhanced_model_training.ipynb
-```
-Execute todas as células para gerar modelos em `data_science/models/enhanced/`.
+## 🎯 Sobre este módulo
 
-## 🎯 Overview
+- **Modelos**: TF-IDF + Regressão Logística (original) e Random Forest (enhanced)
+- **Classes**: Positivo, Neutro, Negativo
+- **API**: FastAPI com documentação automática em /docs
+- **Acurácia**: 88-92% (depende do modelo)
 
-- **Model**: Logistic Regression with TF-IDF vectorization
-- **Classes**: Positive, Neutral, Negative (with class balancing for negative detection)
-- **API**: FastAPI with automatic documentation
-- **Performance**: 88% accuracy, 96% negative recall
+## 🤖 Modelos disponíveis
 
-## 🤖 Available Models
+### Modelo Original
+- **Algoritmo**: TF-IDF + Regressão Logística
+- **Features**: Apenas texto
+- **Acurácia**: ~88%
+- **Quando usar**: Análise rápida e compatibilidade
 
-### Original Model (Default)
-- **Algorithm**: TF-IDF + Logistic Regression
-- **Features**: Text only
-- **Accuracy**: ~88%
-- **Use Case**: Basic sentiment analysis, compatibility
+### Modelo Enhanced (Recomendado)
+- **Algoritmo**: TF-IDF + Random Forest
+- **Features**: Texto + Rating (1-5) + Recomendação (Sim/Não) + Comprimento
+- **Acurácia**: ~92% (4% melhor)
+- **Quando usar**: Análise detalhada com mais informações
 
-### Enhanced Model (Recommended)
-- **Algorithm**: TF-IDF + Random Forest
-- **Features**: Text + Rating (1-5) + Recommendation (Yes/No) + Text Length
-- **Accuracy**: ~92% (4% improvement)
-- **Use Case**: Advanced analysis with metadata, higher accuracy
+## 📊 Comparação de modelos
 
-## 📊 Model Comparison
+| Característica | Original | Enhanced |
+|---|---|---|
+| **Features** | Texto | Texto + Rating + Recomendação |
+| **Algoritmo** | Regressão Logística | Random Forest |
+| **Acurácia** | 88% | 92% |
+| **Tempo de treinamento** | Rápido | Moderado |
+| **Uso de memória** | Baixo | Moderado |
 
-| Feature | Original Model | Enhanced Model |
-|---------|----------------|----------------|
-| **Input Features** | Text only | Text + Rating + Recommendation |
-| **Algorithm** | Logistic Regression | Random Forest |
-| **Accuracy** | 88% | 92% |
-| **Training Time** | Fast | Moderate |
-| **Memory Usage** | Low | Moderate |
-| **API Compatibility** | Full | Extended |
+**Usar Enhanced quando:** Você tem rating e informação de recomendação disponíveis para decisões mais críticas.
 
-### When to Use Enhanced Model
-
-The Enhanced Model provides better accuracy by incorporating:
-- **Rating Score**: 1-5 star rating provides direct sentiment signal
-- **Recommendation**: Binary feature (would recommend to friend)
-- **Text Length**: Contextual information about review depth
-- **Combined Analysis**: Multiple signals reduce ambiguity
-
-**Best for**: Production deployments, critical business decisions, detailed analysis.
-
-## 🚀 Running with Docker (Recommended)
-
-The API is containerized and runs as part of the complete Docker Compose setup:
+## 🚀 Rodar com Docker (Recomendado)
 
 ```bash
-# From project root
 sudo docker-compose up -d
 ```
 
-API will be available at: http://localhost:5000
+API disponível em: http://localhost:8000 com documentação em /docs
 
-## 🛠️ Local Development Setup
+## 🚀 Setup local para desenvolvimento
 
-If you want to run the API locally for development:
-
-### Prerequisites
+### Requisitos
 - Python 3.11+
-- Virtual environment (sentiment-env provided)
+- pip
 
-### Setup Environment
+### Instalação
 
-1. **Activate the provided virtual environment**
+1. **Criar e ativar ambiente virtual**
    ```bash
-   cd tools/sentiment-env
-   source bin/activate
+   python3 -m venv sentiment-env
+   source sentiment-env/bin/activate
    ```
 
-2. **Install dependencies** (if needed)
+2. **Instalar dependências**
    ```bash
-   pip install -r ../requirements.txt
+   pip install -r requirements.txt
    ```
 
-### Run the API Locally
+3. **Rodar a API**
+   ```bash
+   python enhanced_sentiment_api.py 8000
+   ```
 
-```bash
-cd data_science
-python sentiment_api.py
-```
+Acesse: http://localhost:8000
 
-API will start on: http://localhost:5000
+## 🧠 Treinar modelo enhanced
 
-## 🧠 Training the Enhanced Model
+Para treinar o modelo enhanced com melhor acurácia:
 
-The Enhanced Model provides better accuracy by using multiple features. To train it:
-
-### Prerequisites
-- Processed dataset (`datasets/reviews_cleaned.json`) - generated by `sentiment_model.ipynb`
-- Jupyter Notebook environment
-
-### Training Steps
-
-1. **Navigate to notebooks directory**
+1. **Ir para pasta de notebooks**
    ```bash
    cd notebooks
    ```
 
-2. **Run the enhanced training notebook**
+2. **Executar o notebook**
    ```bash
    jupyter notebook enhanced_model_training.ipynb
    ```
 
-3. **Execute all cells** in the notebook to:
-   - ✅ Load pre-processed data from `reviews_cleaned.json`
-   - ✅ Create TF-IDF features from cleaned text
-   - ✅ Add rating, recommendation, and text length features
-   - ✅ Train Random Forest model with multi-feature approach
-   - ✅ Compare performance vs original model
-   - ✅ Save enhanced models to `models/enhanced/`
+3. **Executar todas as células** para:
+   - Carregar dados processados
+   - Criar features TF-IDF
+   - Adicionar rating, recomendação e comprimento
+   - Treinar Random Forest
+   - Salvar em `models/enhanced/`
 
-### Expected Results
-- **Accuracy**: ~99% (26% improvement over original model)
-- **Feature Importance**: Recommendation (30%), Rating (26%), Text features
-- **Training Time**: ~5-10 minutes
-- **Model Size**: ~50MB (larger than original)
+**Resultado esperado:** ~92% acurácia (melhor que modelo original)
 
-### Enhanced Model Files
-After training, these files will be created:
-```
-models/enhanced/
-├── tfidf_vectorizer.joblib      # TF-IDF for text
-├── rating_scaler.joblib         # Scaler for rating feature
-├── random_forest_model.joblib   # Trained Random Forest
-├── sentiment_mapping.json       # Class mappings
-└── model_metadata.json          # Model information
-```
+## 🧪 Testando a API
 
-## 📊 Testando a API Python
-
-Após rodar `python sentiment_api.py` ou `python enhanced_sentiment_api.py`:
-
-**Health Check:**
+**Verificar saúde:**
 ```bash
-curl http://localhost:5000/health
+curl http://localhost:8000/health
 ```
 
 **Predição simples:**
 ```bash
-curl -X POST http://localhost:5000/predict \
+curl -X POST http://localhost:8000/predict \
      -H "Content-Type: application/json" \
-     -d '{"text": "esse produto e otimo"}'
+     -d '{"text": "produto excelente"}'
 ```
 
-**Predição enhanced (se disponível):**
+**Predição enhanced:**
 ```bash
-curl -X POST http://localhost:5000/predict/enhanced \
+curl -X POST http://localhost:8000/predict/enhanced \
      -H "Content-Type: application/json" \
-     -d '{"text":"esse produto e otimo","rating":5,"recommend_to_friend":true}'
+     -d '{"text":"produto excelente","rating":5,"recommend_to_friend":true}'
 ```
 
-**Documentação interativa:**  
-http://localhost:5000/docs
+**Documentação:** http://localhost:8000/docs
 
-## 📁 Directory Structure
+## 📁 Estrutura
 
 ```
 data_science/
-├── models/                 # Trained models and metadata
+├── models/               # Modelos treinados
 │   ├── tfidf_vectorizer.joblib
 │   ├── logistic_regression_model.joblib
-│   ├── sentiment_mapping.json
-│   └── model_metadata.json
-├── datasets/              # Training data
-│   ├── reviews_cleaned.json
-│   └── reviews.json
-├── notebooks/             # Jupyter notebooks for training
-│   ├── training_model.ipynb
-│   └── sentiment_model.ipynb
-├── tools/                 # Development tools
-│   ├── convert_dataset.py
-│   └── sentiment-env/     # Virtual environment
-├── sentiment_api.py       # FastAPI application
-├── requirements.txt       # Python dependencies
-└── README.md             # This file
+│   └── enhanced/         # Modelos avançados
+├── datasets/             # Dados de treinamento
+├── notebooks/            # Notebooks Jupyter
+├── enhanced_sentiment_api.py  # API (principal)
+├── requirements.txt
+└── README.md
 ```
 
-## 🧠 Model Details
+## 📊 Configuração do treinamento
 
-### Training Configuration
-- **Vectorizer**: TF-IDF with max 1000 features, unigrams + bigrams
-- **Model**: Logistic Regression with custom class weights
-- **Class Weights**: {Negative: 5.0, Neutral: 1.0, Positive: 1.0}
-- **Optimization**: Focused on negative comment detection
+- **Vectorizer**: TF-IDF com 1000 features (unigrams + bigrams)
+- **Modelo**: Regressão Logística com pesos personalizados
+- **Pesos**: Negativo (5.0), Neutro (1.0), Positivo (1.0)
+- **Foco**: Detectar comentários negativos
 
-### Performance Metrics
-- Accuracy: 88%
-- Precision: 92%
-- Recall (Negative): 96%
+**Métricas:**
+- Acurácia: 88%
+- Recall (Negativos): 96%
 - F1-Score: 84%
-- AUC: 95.6%
 
-##  API Endpoints
+## 🧪 Endpoints da API
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/` | API information |
-| GET | `/health` | Health check |
-| GET | `/docs` | Interactive documentation |
-| POST | `/predict` | Single text prediction |
-| POST | `/predict_bulk` | Multiple texts prediction |
+- `POST /predict` - Modelo original (apenas texto)
+- `POST /predict/enhanced` - Modelo enhanced (texto + rating + recomendação)
+- `POST /predict/auto` - Seleciona modelo automaticamente
+- `GET /health` - Verificar saúde da API
+- `GET /docs` - Documentação interativa
 
 ## 🐛 Troubleshooting
